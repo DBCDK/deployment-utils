@@ -43,6 +43,9 @@ def setup_args():
         "accepts * and ? as wildcards")
     parser.add_argument("--include", help="pattern for files to include, "
         "accepts * and ? as wildcards")
+    parser.add_argument("--separator",
+        help="string for separating multiple config files printed to stdout, "
+        "defaults to --- (separating yaml files)", default="---")
     args = parser.parse_args()
     return args
 
@@ -76,6 +79,7 @@ def merge_template_keys(file_path, template_keys_from_args):
     return template_keys
 
 def iterate_input(args):
+    separator = args.separator + "\n" if args.separator else ""
     for root, dirs, files in os.walk(args.input):
         for f_path in files:
             with open(os.path.join(root, f_path)) as fp:
@@ -96,7 +100,9 @@ def iterate_input(args):
                             "w") as output_fp:
                         output_fp.write(s)
                 else:
-                    sys.stdout.write(s)
+                    if s[-1] != "\n":
+                        s += "\n"
+                    sys.stdout.write(s + separator)
 
 def main():
     args = setup_args()
